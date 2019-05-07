@@ -1,5 +1,8 @@
+# SAIKIRAN PALIMPATI    
+# OS -ASSIGNMENT 4
+# TO RUN THE PROGRAM FROM THE COMMAND PROMPT 
 # python driver.py filename=snapshots
-#program 2 
+# In this program the physical memory is changed and pagefaults are calculated
 
 
 import sys
@@ -164,12 +167,6 @@ class page_table(object):
 
 
 
-
-
-
-
-
-
 #physical meory class
 class physical_memory(object):
     
@@ -224,11 +221,44 @@ class virtual_memory(object):
         else:
             return False
 
+#plot the pagefaults with the algorithms used for replacement
+def plotImage(algorithm,pageFaultCOunt,pm,vm):
+    plt.bar(algorithm,pageFaultCOunt)
+    title="physicalMemory = "+str(pm)+" virualMemory = "+str(vm)
+    plt.tight_layout()
+    plt.suptitle(title)
+    plt.xlabel('Algorithms')
+    plt.ylabel('PageFault Count')
+
+
+#save the plots of each individual file in a directory
+def save_plot(pm,vm,file):
+    directory=os.getcwd()
+    result_test=directory+"_results"
+    if directory==result_test:
+        directory=result_test
+    else:
+        os.chdir(result_test)
+    directory_result=file
+    
+    if os.path.isdir(directory_result):
+        pass
+    else:
+        os.mkdir(directory_result)
+    strin="physicalMemory = "+str(pm)+" virualMemory = "+str(vm)+".png"
+    os.chdir(directory_result)
+    plt.savefig(strin)
+    plt.figure()
+    os.chdir(directory)
+
+
+
 
 
 #main function
 if __name__=='__main__':
-    start = time.time()
+    
+    # start = time.time()
     args = myargs(sys.argv)
 
     if not 'filename' in args:
@@ -237,6 +267,13 @@ if __name__=='__main__':
     if os.path.isdir(args['filename']):
         os.chdir(args['filename'])
         filelist=os.listdir()
+        directory=os.getcwd()
+        result_test=directory+"_results"
+        exists=os.path.isdir(result_test)
+        if exists:
+            pass
+        else:
+            os.mkdir(result_test)
     else:
         print("please enter the directory name which contains input files")
     
@@ -269,20 +306,15 @@ if __name__=='__main__':
         page_fault_count_foreach_pm={}
         #for each physical memory taken
         
+
         for i in pm_list:
             pagefualt_dict={}
             pm=i*int(vm_o)
         
-            
-            
-            
             page_fault_each_algorithm={}
             #for each one of the replacement algorithm
             for algorithm in replace_algorithms:
-                
-                
-                
-                
+                 
                 pageFaultCOunt=0
                 timecounter=1
                 
@@ -316,9 +348,6 @@ if __name__=='__main__':
                     Add_Page_To_PM = False
                     pagenumber_pm=str(n)+"_"+str(p)
                     
-                    
-
-
                     #The data once converted then the process checks wether it is in the 
                     
                     #check wether it exists in virtual memory or not
@@ -392,16 +421,16 @@ if __name__=='__main__':
                     #incrementing the time counter by 0.1
                     timecounter+=0.1
                     pagefault_count_each_process["total"]=pageFaultCOunt
-                    # plt.bar(algorithm,pageFaultCOunt)
-                    # plt.suptitle(pm)
+                
+                plotImage(algorithm,pageFaultCOunt,pm,vm)
+               
+                
                 page_fault_each_algorithm[str(algorithm)+"algorithm"]=pagefault_count_each_process
-            # plt.subplots(i,1)
-    
-            # plt.show()
-            # i+=1
+            
+            save_plot(pm,vm,file)
+            
             page_fault_count_foreach_pm["for a PM of"+str(pm)]=page_fault_each_algorithm
             
-        #print(page_fault_count_foreach_pm)
         page_fault_each_file["file"+str(file)+"with a VM of"+str(vm_o)]=page_fault_count_foreach_pm
     print(page_fault_each_file)
   
