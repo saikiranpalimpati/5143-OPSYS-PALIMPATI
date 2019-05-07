@@ -1,26 +1,34 @@
-# SAIKIRAN PALIMPATI    
-# OS -ASSIGNMENT 4
-# TO RUN THE PROGRAM FROM THE COMMAND PROMPT 
-# python driver.py filename=snapshots
-# In this program the physical memory is changed and pagefaults are calculated
+# SAIKIRAN PALIMPATI
+# ASSIGNMENT 4 - OPERATING SYSYTEMS
+# TO RUN THE PROGRAM FROM THE COMMAND PROMPT THE COMMAND BELOW IS EXECUTED.
+# python driver.py filename=snapshots   
+# SNAPSHOTS IS THE FOLDER WITH INPUT FILES
+# IN THIS PROGRAM WE CALCULATE THE NUMBER OF PAGEFAULTS OCCURED WHILE A FEW SET OF PROCESS EXECUTE
+# THE PLOTS ARE SAVED IN A FOLDER WITH NAME snapshots_results("filename_results")
 
 
+#heder files
 import sys
 import os
 import time
 import random
 import matplotlib.pyplot as plt
 
+#function to format the input string
 def str_binary(n,padd=12):
     binfrmt = '{fill}{align}{width}{type}'.format(fill='0', align='>', width=padd, type='b')
     n = format(n,binfrmt)
     return n
 
+
+#error handling 
 def usage(e):
     print("do it right...")
     print(e)
     sys.exit()
 
+
+#extract the arhuments from command prompt
 def myargs(sysargs):
     args = {}
 
@@ -29,6 +37,8 @@ def myargs(sysargs):
         args[k] = v
     return args
 
+
+#read the input file
 def read_file(fin,delimiter="\n"):
     
     if os.path.isfile(fin):
@@ -42,7 +52,7 @@ def read_file(fin,delimiter="\n"):
 
 
 
-#replacement algorithms
+#replacement algorithms 
 def replace_a_page_from_pm(replacement_algorithm,dicitionare,time):
     
     if (replacement_algorithm=="FIFO"):
@@ -58,13 +68,13 @@ def replace_a_page_from_pm(replacement_algorithm,dicitionare,time):
         return randomnReplacement(dicitionare)
 
 
-#first in first out
+#first in first out in this one the process that came first to the physical memory is given out
 def FIFOreplacementAlgorithm(dictionare):
         return list(dictionare.keys())[0]
 
 
 
-#least recently used
+#least recently used : in this one the process that has not been accessed in a while is picked out
 def LRUreplacementAlgorithm(dictionare,time):
     presentime=time
     least_recent=""
@@ -78,7 +88,7 @@ def LRUreplacementAlgorithm(dictionare,time):
     return least_recent
 
 
-# least frequently used 
+# least frequently used : in ths algorithm the process that has not been frequntly used is picked out
 def LFUreplacementAlgorithm(dictionare,time):
     
     least_recent_page=""
@@ -96,7 +106,9 @@ def LFUreplacementAlgorithm(dictionare,time):
     return least_recent_page
 
 
-#randomReplacement algorithm
+
+
+#randomReplacement algorithm : in this one the process is picked out randomly
 def randomnReplacement(dictionare):
     pagenumber=""
     page_list=[]
@@ -107,7 +119,7 @@ def randomnReplacement(dictionare):
     return pagenumber
 
 
-#pageframe
+#pageframe : has the attributes of page
 class page_frame(object):
     def __init__(self):
         self.valid_bit = False  # in memory
@@ -120,7 +132,7 @@ class page_frame(object):
 
 
 
-#page table
+#page table : keeps track of each page 
 class page_table(object):
     
     #initialise page table for a process
@@ -167,7 +179,7 @@ class page_table(object):
 
 
 
-#physical meory class
+#physical meory class 
 class physical_memory(object):
     
     def __init__(self,mem_size):
@@ -288,149 +300,131 @@ if __name__=='__main__':
         name=f[0]
         
         #np be number of processes and vm is size of virtual memory
-        s,run,np,vm_o= name.split('_')
         
-        # print("{} {} {} {}".format(s,run,np,vm))
+        s,run,np,vm,pm = name.split('_')
+        np=int(np)
+        pm=int(pm)
+        vm=int(vm)
+        print("{} {} {} {}".format(s,run,np,vm,pm))
         # print(s)
-        vm=int(vm_o)+1
         
         #store the whole data in a fiel to a string
         data=read_file(file," ")
-        pm_list=[0.1,0.25,0.5]
         
         #thw list which contains replacement algorithms
         replace_algorithms=["FIFO","LRU","LFU","RANDOMN"]
         
-
-        # pagefault_dict_list=[]
-        page_fault_count_foreach_pm={}
-        #for each physical memory taken
+        pagefualt_dict={}
+        page_fault_each_algorithm={}
         
-
-        for i in pm_list:
-            pagefualt_dict={}
-            pm=i*int(vm_o)
         
-            page_fault_each_algorithm={}
-            #for each one of the replacement algorithm
-            for algorithm in replace_algorithms:
-                 
-                pageFaultCOunt=0
-                timecounter=1
-                
-                #creating pyhsical memory
-                pmobject=physical_memory(pm)
-                
-                #pagefault count for each process
-                pagefault_count_each_process={}
-                
-                #creating virtual memory and a pagetable for each processes
-                vm_obj=[]
-                pagetable_obj=[]
-
-                for i in range(0,int(np)):
-                    vm_obj.append(virtual_memory(vm))
-                    pagetable_obj.append(page_table(vm,pm))
-                    pagefault_count_each_process['process'+str(i)]=0
-                
-                i=1
-                # data in each file
-                #Accessing the data in a file
-                for d in data:
-
-                    p,h = d.split(',')
-                    n = int(h, 16)
-                    b = str_binary(n,7)
-                    # print("{} {} \t{} ".format(p,h,n))
-                    p=int(p)
-                    
-                    vm_existance=vm_obj[p].checkForPageInVirtualMemory(n)
-                    Add_Page_To_PM = False
-                    pagenumber_pm=str(n)+"_"+str(p)
-                    
-                    #The data once converted then the process checks wether it is in the 
-                    
-                    #check wether it exists in virtual memory or not
-                    if(vm_existance==True):
-                        #to check wether the page is in physical memory we lookup pagetable
-                        page_existence_in_pm=pagetable_obj[p].checkValid(n)
-                        # check wether the page is in physical memory
-                        #if it exists update access count in physical memory and page tacble
-                        if(page_existence_in_pm==True):
-                            # print("page exist")
-                            pmobject.updateAcess(pagenumber_pm,timecounter)
-                            pagetable_obj[p].update_About_Access(n,timecounter)
-                            # pmobject.displayPhysicalMemory()
-                        elif(page_existence_in_pm==False):
-                            # print("fage fault occured while adding this page")
+        
+        
+        #for each one of the replacement algorithm
+        for algorithm in replace_algorithms:
+            pageFaultCOunt=0
+            timecounter=1
+            
+            #creating pyhsical memory
+            pmobject=physical_memory(int(pm))
+           
+            #pagefault count for each process
+            pagefault_count_each_process={}
 
 
-                            pagefault_count_each_process['process'+str(p)]+=1
-                            pageFaultCOunt+=1
-                            # print("page should be added")
-                            Add_Page_To_PM=True
-                    
-                    
-                    
-                    #if it does not exist in virtual memory then put it in virtual memory then physical memory
-                    elif(vm_existance==False):
-                        #pageFaultcount automatically goes up as it doesnot even exists in virtual memory
+            #creating virtual memory and a pagetable for each processes
+            vm_obj=[]
+            pagetable_obj=[]
+            for i in range(0,int(np)):
+                vm_obj.append(virtual_memory(vm))
+                pagetable_obj.append(page_table(vm,pm))
+                pagefault_count_each_process['process'+str(i)]=0
+            
+            i=1
+            # data in each file
+            #Accessing the data in a file
+            for d in data:
+                p,h = d.split(',')
+                n = int(h, 16)
+                b = str_binary(n,7)
+                # print("{} {} \t{} ".format(p,h,n))
+                p=int(p)
+                vm_existance=vm_obj[p].checkForPageInVirtualMemory(n)
+                Add_Page_To_PM = False
+                pagenumber_pm=str(n)+"_"+str(p)
+            
+                #The data once converted then the process checks wether it is in the 
+         
+                #check wether it exists in virtual memory or not
+                if(vm_existance==True):
+                    #to check wether the page is in physical memory we lookup pagetable
+                    page_existence_in_pm=pagetable_obj[p].checkValid(n)
+                    # check wether the page is in physical memory
+                    #if it exists update access count in physical memory and page tacble
+                    if(page_existence_in_pm==True):
+                        # print("page exist")
+                        pmobject.updateAcess(pagenumber_pm,timecounter)
+                        pagetable_obj[p].update_About_Access(n,timecounter)
+                        # pmobject.displayPhysicalMemory()
+                    elif(page_existence_in_pm==False):
                         # print("fage fault occured while adding this page")
-
-                        pageFaultCOunt+=1
                         pagefault_count_each_process['process'+str(p)]+=1
-                        vm_obj[p].addToVirtualMemory(n)
-                        pagetable_obj[p].add_page_PageTable(n)
+                        pageFaultCOunt+=1
+                        # print("page should be added")
                         Add_Page_To_PM=True
                     
+
+                #if it does not exist in virtual memory then put it in virtual memory then physical memory
+                elif(vm_existance==False):
+                    #pageFaultcount automatically goes up as it doesnot even exists in virtual memory
+                    # print("fage fault occured while adding this page")
+
+                    pageFaultCOunt+=1
+                    pagefault_count_each_process['process'+str(p)]+=1
+                    vm_obj[p].addToVirtualMemory(n)
+                    pagetable_obj[p].add_page_PageTable(n)
+                    Add_Page_To_PM=True
                     
-                    #add the page to physical memory
-                    if(Add_Page_To_PM==True):
-                        
-                        #check if it is getting added to physical memory
-                        Page_Added_To_Pm=pmobject.addToPhysicalMemory(pagenumber_pm,timecounter)
-                        
-                        #if added then let the pagetable  know that the page is added to physical memory
-                        if Page_Added_To_Pm==True:
-                            pagetable_obj[p].added_to_PM(n,timecounter)
+                #add the page to physical memory
+                if(Add_Page_To_PM==True):  
+                    #check if it is getting added to physical memory
+                    Page_Added_To_Pm=pmobject.addToPhysicalMemory(pagenumber_pm,timecounter)
+                    #if added then let the pagetable  know that the page is added to physical memory
+                    if Page_Added_To_Pm==True:
+                        pagetable_obj[p].added_to_PM(n,timecounter)
                         
                         
-                        #if it is not added then one of the page should be replaced
-                        elif Page_Added_To_Pm==False:
+                    #if it is not added then one of the page should be replaced
+                    elif Page_Added_To_Pm==False:
                             
-                            #get the page to be replaced from one of the replacement algorithms
-                            pageToBeReplaced=replace_a_page_from_pm(algorithm,pmobject.mem_table,timecounter) 
-                            # print("\t","page replaced is",pageToBeReplaced)
+                        #get the page to be replaced from one of the replacement algorithms
+                        pageToBeReplaced=replace_a_page_from_pm(algorithm,pmobject.mem_table,timecounter) 
+                        # print("\t","page replaced is",pageToBeReplaced)  
+                        #remove from physical memory
+                        pmobject.removeFromMemory(pageToBeReplaced)
+                        #string breakdown so that the process number and pagenumber can be breakdown
+                        temp_page=pageToBeReplaced.split("_")
+                        pageToBeReplaced_pagenumber=int(temp_page[0])
+                        pageToBeReplaced_process=int(temp_page[1])   
+                        #update the pagetable of the process
+                        pagetable_obj[pageToBeReplaced_process].remove_from_pm(pageToBeReplaced_pagenumber)
+                        #add the page to physical memory
+                        pmobject.addToPhysicalMemory(pagenumber_pm,timecounter)
+                        pagetable_obj[p].added_to_PM(n,timecounter)
                             
-                            #remove from physical memory
-                            pmobject.removeFromMemory(pageToBeReplaced)
-                            
-                            #string breakdown so that the process number and pagenumber can be breakdown
-                            temp_page=pageToBeReplaced.split("_")
-                            pageToBeReplaced_pagenumber=int(temp_page[0])
-                            pageToBeReplaced_process=int(temp_page[1])
-                            
-                            
-                            #update the pagetable of the process
-                            pagetable_obj[pageToBeReplaced_process].remove_from_pm(pageToBeReplaced_pagenumber)
-                            
-                            #add the page to physical memory
-                            pmobject.addToPhysicalMemory(pagenumber_pm,timecounter)
-                            pagetable_obj[p].added_to_PM(n,timecounter)
-                            
-                    #incrementing the time counter by 0.1
-                    timecounter+=0.1
-                    pagefault_count_each_process["total"]=pageFaultCOunt
+                #incrementing the time counter by 0.1
+                timecounter+=0.1
+                pagefault_count_each_process["total"]=pageFaultCOunt
                 
-                plotImage(algorithm,pageFaultCOunt,pm,vm)
+            plotImage(algorithm,pageFaultCOunt,pm,vm)
                
                 
-                page_fault_each_algorithm[str(algorithm)+"algorithm"]=pagefault_count_each_process
+            page_fault_each_algorithm[str(algorithm)+"algorithm"]=pagefault_count_each_process
+            print("algorithm ",algorithm," no of pagefaults ",pagefault_count_each_process)
+        save_plot(pm,vm,file)
             
-            save_plot(pm,vm,file)
+        # page_fault_count_foreach_pm["for a PM of"+str(pm)]=page_fault_each_algorithm
             
-            page_fault_count_foreach_pm["for a PM of"+str(pm)]=page_fault_each_algorithm
-            
-        page_fault_each_file["file"+str(file)+"with a VM of"+str(vm_o)]=page_fault_count_foreach_pm
-    print(page_fault_each_file)
+        # page_fault_each_file["file"+str(file)+"with a VM of"+str(vm_o)]=page_fault_count_foreach_pm
+  
   
